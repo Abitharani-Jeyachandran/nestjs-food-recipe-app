@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, UseGuards } from '@nestjs/common';
 import { FoodService } from './food.service';
 import { CreateFoodDto } from './create-food.dto';
 import { UpdateFoodDto } from './update-food.dto';
