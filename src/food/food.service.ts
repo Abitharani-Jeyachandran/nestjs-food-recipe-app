@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, ForbiddenException, HttpException, HttpStatus, Injectable, NotFoundException } from '@nestjs/common';
 import { CreateFoodDto } from './create-food.dto';
 import { UpdateFoodDto } from './update-food.dto';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -17,22 +17,33 @@ export class FoodService {
     try {
       const newFoodItem = this.foodRepository.create(createFoodDto);
       newFoodItem.created_at = new Date();
-      return await this.foodRepository.save(newFoodItem);
+      return this.foodRepository.save(newFoodItem);
     } catch (error) {
-      return error;
+      if (error instanceof BadRequestException) {
+        throw new HttpException('Validation failed', HttpStatus.BAD_REQUEST);
+      } else {
+        throw new HttpException(
+          'An error occurred while creating the food',
+          HttpStatus.INTERNAL_SERVER_ERROR,
+        );
+      }
     }
   }
 
   // Find all recipes
   async findAll() {
-    return await this.foodRepository.find();
+    try {
+      return await this.foodRepository.find();
+    } catch (error) {
+      throw new NotFoundException();
+    }
   }
 
   // Find one recipe
   async findOne(id: number) {
     const oneFoodItem = await this.foodRepository.findOne({ where: { id: id } });
     if (!oneFoodItem) {
-      throw new NotFoundException(` ID '${id}' not found`);
+      throw new NotFoundException();
     }
     return oneFoodItem;
   }
@@ -40,6 +51,12 @@ export class FoodService {
   // Update food recipe
   async update(id: number, updateFoodDto: UpdateFoodDto) {
     updateFoodDto.updated_at = new Date();
-    await this.foodRepository.update({ id }, updateFoodDto)
+    const updateResult = await this.foodRepository.update({ id }, updateFoodDto);
+    if (updateResult.affected == 0) {
+      throw new NotFoundException();
+    }
+    return {
+      statusCode: HttpStatus.OK
+    };
   }
 }

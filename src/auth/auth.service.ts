@@ -10,13 +10,17 @@ export class AuthService {
   ) { }
 
   async signIn(username, password) {
-    const user = await this.usersService.findOne(username);
-    if (user?.password !== password) {
-      throw new UnauthorizedException();
+    try {
+      const user = await this.usersService.findOne(username);
+      if (!user || user.password != password) {
+        throw new UnauthorizedException('Invalid credentials');
+      }
+      const payload = { sub: user.userId, username: user.username };
+      return {
+        access_token: await this.jwtService.signAsync(payload),
+      };
+    } catch (error) {
+      throw new UnauthorizedException('Failed to sign in');
     }
-    const payload = { sub: user.userId, username: user.username };
-    return {
-      access_token: await this.jwtService.signAsync(payload),
-    };
   }
 }
