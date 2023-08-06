@@ -17,7 +17,7 @@ export class FoodService {
     try {
       const newFoodItem = this.foodRepository.create(createFoodDto);
       newFoodItem.created_at = new Date();
-      return this.foodRepository.save(newFoodItem);
+      return await this.foodRepository.save(newFoodItem);
     } catch (error) {
       if (error instanceof BadRequestException) {
         throw new HttpException('Validation failed', HttpStatus.BAD_REQUEST);
@@ -38,7 +38,7 @@ export class FoodService {
       throw new NotFoundException();
     }
   }
-
+await
   // Find one recipe
   async findOne(id: number) {
     const oneFoodItem = await this.foodRepository.findOne({ where: { id: id } });
