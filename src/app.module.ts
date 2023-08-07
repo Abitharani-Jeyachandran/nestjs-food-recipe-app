@@ -12,7 +12,7 @@ const settings = require("../ormconfig.js");
 @Module({
   imports: [
     ConfigModule.forRoot({
-      envFilePath: ['.env'],
+      envFilePath: '.env.dev',
       isGlobal: true,
     }),
     TypeOrmModule.forRoot(settings),
